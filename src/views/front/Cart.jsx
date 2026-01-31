@@ -9,10 +9,9 @@ export default function Cart() {
     const getCart = async () => {
       try {
         const res = await axios.get(`${API_BASE}/v2/api/${API_PATH}/cart`);
-        console.log(res.data.data);
         setCart(res.data.data);
       } catch (error) {
-        console.log(error.message);
+        alert(error.message);
       }
     };
     getCart();
@@ -29,12 +28,34 @@ export default function Cart() {
         `${API_BASE}/v2/api/${API_PATH}/cart/${cartId}`,
         { data },
       );
-      console.log(res);
       const res2 = await axios.get(`${API_BASE}/v2/api/${API_PATH}/cart`);
-      console.log(res2.data.data);
       setCart(res2.data.data);
     } catch (error) {
-      console.log(error.message);
+      alert(error.message);
+    }
+  };
+
+  //deleteCart api
+  const deleteeCart = async (cartId) => {
+    try {
+      const res = await axios.delete(
+        `${API_BASE}/v2/api/${API_PATH}/cart/${cartId}`,
+      );
+      const res2 = await axios.get(`${API_BASE}/v2/api/${API_PATH}/cart`);
+      setCart(res2.data.data);
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
+  //deleteCarts api
+  const deleteCarts = async () => {
+    try {
+      const res = await axios.delete(`${API_BASE}/v2/api/${API_PATH}/carts`);
+      const res2 = await axios.get(`${API_BASE}/v2/api/${API_PATH}/cart`);
+      setCart(res2.data.data);
+    } catch (error) {
+      alert(error.message);
     }
   };
 
@@ -42,7 +63,11 @@ export default function Cart() {
     <div className="container">
       <h2>購物車列表</h2>
       <div className="text-end mt-4">
-        <button type="button" className="btn btn-outline-danger">
+        <button
+          type="button"
+          className="btn btn-outline-danger"
+          onClick={(e) => deleteCarts()}
+        >
           清空購物車
         </button>
       </div>
@@ -59,7 +84,12 @@ export default function Cart() {
           {cart?.carts?.map((item) => (
             <tr key={item.id}>
               <td>
-                <button type="button" className="btn btn-outline-danger btn-sm">
+                <button
+                  type="button"
+                  className="btn btn-outline-danger btn-sm"
+                  data-id={item.id}
+                  onClick={(e) => deleteeCart(e.target.dataset.id)}
+                >
                   刪除
                 </button>
               </td>

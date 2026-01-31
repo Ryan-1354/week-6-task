@@ -33,7 +33,7 @@ export default function SingleProduct() {
       const res = await axios.post(`${API_BASE}/v2/api/${API_PATH}/cart`, {
         data,
       });
-      console.log(res);
+      alert(res);
     } catch (error) {
       console.log(error.message);
     }

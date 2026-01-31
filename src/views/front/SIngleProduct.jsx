@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 const API_BASE = import.meta.env.VITE_API_BASE;
 const API_PATH = import.meta.env.VITE_API_PATH;
 import axios from "axios";
@@ -22,6 +22,23 @@ export default function SingleProduct() {
     };
     handleView(id);
   }, [id]);
+
+  //addcart api
+  const addCart = async (id, qty = 1) => {
+    try {
+      const data = {
+        product_id: id,
+        qty,
+      };
+      const res = await axios.post(`${API_BASE}/v2/api/${API_PATH}/cart`, {
+        data,
+      });
+      console.log(res);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
   return !product ? (
     <h2>載入中</h2>
   ) : (
@@ -44,9 +61,10 @@ export default function SingleProduct() {
           <p className="card-text">{product.unit}</p>
           <button
             className="btn btn-primary"
-            onClick={() => handleView(product.id)}
+            type="button"
+            onClick={() => addCart(product.id)}
           >
-            View
+            Add
           </button>
         </div>
       </div>

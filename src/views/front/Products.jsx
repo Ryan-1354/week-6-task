@@ -12,10 +12,10 @@ export default function Products() {
     const getProduct = async () => {
       try {
         const res = await axios.get(`${API_BASE}/v2/api/${API_PATH}/products`);
-        console.log(res.data.products);
+        console.log(res);
         setProducts(res.data.products);
       } catch (error) {
-        console.log(error.data.products);
+        console.log(error.message);
       }
     };
     getProduct();

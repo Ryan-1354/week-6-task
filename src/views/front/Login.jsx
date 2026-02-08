@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
 // 引入axios
 import axios from "axios";
@@ -11,8 +11,8 @@ import "../../assets/style.css";
 export default function Login() {
   //管理登入資訊
   const [formData, setFormData] = useState({
-    username: "1354ark@gmail.com",
-    password: "hexschool666",
+    username: "example@gmail.com",
+    password: "",
   });
   //管理登入狀態
   const [isAuth, setIsAuth] = useState(false);
@@ -41,7 +41,7 @@ export default function Login() {
       setIsAuth(true); //只要api打成功不管帳密對不對都登入成功
     } catch (err) {
       setIsAuth(false);
-      alert("帳號或密碼錯誤");
+      alert(err.message);
     }
   };
 

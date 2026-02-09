@@ -6,6 +6,8 @@ import { useForm } from "react-hook-form";
 
 export default function Checkout() {
   const [cart, setCart] = useState([]);
+  const [loadingProductId, setLoadingProductId] = useState(null);
+
   const {
     register,
     handleSubmit,
@@ -25,6 +27,7 @@ export default function Checkout() {
 
   //updateCart api
   const updateCart = async (cartId, productId, qty = 1) => {
+    setLoadingProductId(id);
     const data = {
       product_id: productId,
       qty,
@@ -51,6 +54,8 @@ export default function Checkout() {
       setCart(res2.data.data);
     } catch (error) {
       alert(error.message);
+    } finally {
+      setLoadingProductId(null);
     }
   };
 
@@ -67,13 +72,26 @@ export default function Checkout() {
 
   //form onSubmit
 
-  const onSubmit = (formData) => {
-    console.log(formData);
+  const onSubmit = async (formData) => {
+    try {
+      const data = {
+        user: formData,
+        message: formData.message,
+      };
+      const res = await axios.post(`${API_BASE}/v2/api/${API_PATH}/order`, {
+        data,
+      });
+      const res2 = await axios.get(`${API_BASE}/v2/api/${API_PATH}/cart`);
+      setCart(res2.data.data);
+      console.log(res);
+    } catch (error) {
+      alert(error.message);
+    }
   };
 
   return (
     <div className="container">
-      <h2>購物車列表</h2>
+      <h2>結帳</h2>
       <div className="text-end mt-4">
         <button
           type="button"
@@ -101,6 +119,7 @@ export default function Checkout() {
                   className="btn btn-outline-danger btn-sm"
                   data-id={item.id}
                   onClick={(e) => deleteeCart(e.target.dataset.id)}
+                  disabled={loadingProductId === item.id}
                 >
                   刪除
                 </button>

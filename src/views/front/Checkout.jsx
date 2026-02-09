@@ -3,25 +3,36 @@ const API_PATH = import.meta.env.VITE_API_PATH;
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { RotatingLines } from "react-loader-spinner";
 
 export default function Checkout() {
   const [cart, setCart] = useState([]);
+  const [loadingCartId, setLoadingCartId] = useState(null);
   const [loadingProductId, setLoadingProductId] = useState(null);
+  const [products, setProducts] = useState([]);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm({ mode: "onChange" });
+
   useEffect(() => {
     const getCart = async () => {
       try {
-        const res = await axios.get(`${API_BASE}/v2/api/${API_PATH}/cart`);
-        setCart(res.data.data);
+        const cartRes = await axios.get(`${API_BASE}/v2/api/${API_PATH}/cart`);
+        setCart(cartRes.data.data);
+
+        const productRes = await axios.get(
+          `${API_BASE}/v2/api/${API_PATH}/products`,
+        );
+        setProducts(productRes.data.products);
+        console.log(productRes);
       } catch (error) {
         alert(error.message);
       }
     };
+
     getCart();
   }, []);
 
@@ -70,6 +81,27 @@ export default function Checkout() {
     }
   };
 
+  //addcart api
+  const addCart = async (id, qty = 1) => {
+    setLoadingCartId(id);
+    try {
+      const data = {
+        product_id: id,
+        qty,
+      };
+      const res = await axios.post(`${API_BASE}/v2/api/${API_PATH}/cart`, {
+        data,
+      });
+      const res2 = await axios.get(`${API_BASE}/v2/api/${API_PATH}/cart`);
+      console.log(res.data.message);
+      setCart(res2.data.data);
+    } catch (error) {
+      console.log(error.message);
+    } finally {
+      setLoadingCartId(null);
+    }
+  };
+
   //form onSubmit
 
   const onSubmit = async (formData) => {
@@ -92,6 +124,75 @@ export default function Checkout() {
   return (
     <div className="container">
       <h2>結帳</h2>
+      <table className="table">
+        <thead>
+          <tr>
+            <th scope="col"></th>
+            <th scope="col">品名</th>
+            <th scope="col">價格</th>
+            <th scope="col">操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          {products.map((product) => (
+            <tr key={product.id}>
+              <td>
+                {product.imageUrl ? (
+                  <img
+                    src={product.imageUrl}
+                    style={{
+                      width: "80px",
+                      height: "80px",
+                      objectFit: "cover",
+                    }}
+                  />
+                ) : (
+                  <img
+                    src="https://static.vecteezy.com/system/resources/thumbnails/008/695/917/small/no-image-available-icon-simple-two-colors-template-for-no-image-or-picture-coming-soon-and-placeholder-illustration-isolated-on-white-background-vector.jpg"
+                    style={{
+                      width: "80px",
+                      height: "80px",
+                      objectFit: "cover",
+                    }}
+                  />
+                )}
+              </td>
+              <td>{product.title}</td>
+              <td>{product.price}</td>
+              <td>
+                <div
+                  className="btn-group"
+                  role="group"
+                  aria-label="Basic example"
+                >
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={() => {
+                      addCart(product.id);
+                    }}
+                    disabled={loadingCartId === product.Id}
+                  >
+                    {loadingCartId === product.id ? (
+                      <RotatingLines color="white" width={80} height={16} />
+                    ) : (
+                      "加入購物車"
+                    )}
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td className="text-end" colSpan="3">
+              總計
+            </td>
+            <td className="text-end">{cart.final_total}</td>
+          </tr>
+        </tfoot>
+      </table>
       <div className="text-end mt-4">
         <button
           type="button"
@@ -106,8 +207,8 @@ export default function Checkout() {
           <tr>
             <th scope="col"></th>
             <th scope="col">品名</th>
-            <th scope="col">數量/單位</th>
-            <th scope="col">小計</th>
+            <th scope="col">數量</th>
+            <th scope="col">總價</th>
           </tr>
         </thead>
         <tbody>
@@ -132,7 +233,7 @@ export default function Checkout() {
                     className="form-control"
                     aria-label="Sizing example input"
                     aria-describedby="inputGroup-sizing-sm"
-                    defaultValue={item.qty}
+                    value={item.qty}
                     onChange={(e) =>
                       updateCart(
                         item.id,
